@@ -1,0 +1,5 @@
+services:
+  congresos:
+    build:
+      context: .
+    image: congresos:1.0.0

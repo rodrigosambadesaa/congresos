@@ -1,0 +1,28 @@
+name: Java4Shell Docker security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate Docker Compose
+        run: docker compose config --quiet
+      - name: Rebuild from refreshed Java 17 base images
+        run: docker build --pull -t congresos-java4shell .
+      - name: Assert vulnerable Base64 intrinsic disabled
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --entrypoint java congresos-java4shell -XX:+PrintFlagsFinal -version 2>&1 \
+            | grep -E 'UseBASE64Intrinsics[[:space:]]+=[[:space:]]+false'
